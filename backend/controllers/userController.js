@@ -10,15 +10,18 @@ const loginUser = async (req, res) => {
   try {
     const user = await userModel.findOne({ email });
     if (!user) {
-      return res.json({ success: false, message: "User Doesn't exist" });
+      return res.json({ success: false, message: "User doesn't exist" });
     }
-    const isMatch =await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    
+    // If you're storing passwords in plain text (not recommended), you can directly compare them
+    if (password !== user.password) {
       return res.json({ success: false, message: "Invalid Credentials" });
     }
-    const role=user.role;
+
+    // If passwords match, generate the token and send it in the response
+    const role = user.role;
     const token = createToken(user._id);
-    res.json({ success: true, token,role });
+    res.json({ success: true, token, role });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: "Error" });
@@ -55,13 +58,13 @@ const registerUser = async (req, res) => {
 
     // hashing user password
 
-    const salt = await bcrypt.genSalt(Number(process.env.SALT));
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // const salt = await bcrypt.genSalt(Number(process.env.SALT));
+    // const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = new userModel({
       name: name,
       email: email,
-      password: hashedPassword,
+      password: password,
     });
 
     const user = await newUser.save();
